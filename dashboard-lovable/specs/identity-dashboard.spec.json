@@ -1,0 +1,75 @@
+{
+  "name": "Codex ID Dashboard",
+  "version": "0.1.0",
+  "description": "Identity management dashboard for Codex ID attestation system",
+  "target": "lovable",
+  "pages": [
+    {
+      "name": "Dashboard",
+      "route": "/",
+      "components": [
+        {
+          "type": "stats-grid",
+          "data": [
+            { "label": "Total Attestations", "source": "GET /api/v1/identity/stats/total" },
+            { "label": "Active Attestations", "source": "GET /api/v1/identity/stats/active" },
+            { "label": "Revoked", "source": "GET /api/v1/identity/stats/revoked" },
+            { "label": "Pending Verification", "source": "GET /api/v1/identity/stats/pending" }
+          ]
+        },
+        {
+          "type": "table",
+          "title": "Recent Attestations",
+          "source": "GET /api/v1/identity/recent",
+          "columns": ["Subject", "Schema", "Status", "Created", "Expires", "Actions"]
+        }
+      ]
+    },
+    {
+      "name": "Create Attestation",
+      "route": "/create",
+      "components": [
+        {
+          "type": "form",
+          "title": "New Identity Attestation",
+          "action": "POST /api/v1/identity",
+          "fields": [
+            { "name": "subjectAddress", "type": "text", "label": "Subject Wallet Address", "validation": "ethereum-address" },
+            { "name": "documentContent", "type": "textarea", "label": "Document Content" },
+            { "name": "schemaName", "type": "select", "label": "Schema Type", "options": ["codex.identity.notary.v1", "codex.identity.kyc.v1", "codex.identity.credential.v1"] },
+            { "name": "expiresAt", "type": "datetime", "label": "Expiration Date" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Verify",
+      "route": "/verify",
+      "components": [
+        {
+          "type": "form",
+          "title": "Verify Attestation",
+          "action": "GET /api/v1/identity/verify/:attestationId",
+          "fields": [
+            { "name": "attestationId", "type": "text", "label": "Attestation ID" }
+          ]
+        },
+        {
+          "type": "result-card",
+          "title": "Verification Result",
+          "fields": ["Status", "Issuer", "Subject", "Document Hash", "Created", "Expires"]
+        }
+      ]
+    }
+  ],
+  "theme": {
+    "primary": "#6366f1",
+    "background": "#0f172a",
+    "surface": "#1e293b",
+    "text": "#f8fafc",
+    "mode": "dark"
+  },
+  "api": {
+    "baseUrl": "http://localhost:3000/api/v1"
+  }
+}

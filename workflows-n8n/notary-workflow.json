@@ -1,0 +1,107 @@
+{
+  "name": "Codex ID — Notary Attestation Flow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "notary/attest",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-agent-trigger",
+      "name": "Webhook: Agent Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "notary-agent-webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\n\nif (!input.subjectAddress || !input.documentContent || !input.schemaName) {\n  throw new Error('Missing required fields: subjectAddress, documentContent, schemaName');\n}\n\nconst expiresAt = input.expiresAt || Math.floor(Date.now() / 1000) + (365 * 24 * 60 * 60);\n\nreturn [{\n  json: {\n    subjectAddress: input.subjectAddress,\n    documentContent: input.documentContent,\n    schemaName: input.schemaName,\n    expiresAt: expiresAt\n  }\n}];"
+      },
+      "id": "validate-input",
+      "name": "Validate Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.NESTJS_BASE_URL}}/api/v1/blockchain/hash/{{$json.documentContent}}",
+        "method": "GET",
+        "options": {}
+      },
+      "id": "nestjs-hash-service",
+      "name": "NestJS: Hash Document",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.NESTJS_BASE_URL}}/api/v1/identity",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "subjectAddress", "value": "={{$('Validate Input').item.json.subjectAddress}}" },
+            { "name": "documentContent", "value": "={{$('Validate Input').item.json.documentContent}}" },
+            { "name": "schemaName", "value": "={{$('Validate Input').item.json.schemaName}}" },
+            { "name": "expiresAt", "value": "={{$('Validate Input').item.json.expiresAt}}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "opbnb-mint-attestation",
+      "name": "opBNB: Mint Attestation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [910, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, attestationId: $json.attestationId, transactionHash: $json.transactionHash, blockNumber: $json.blockNumber, documentHash: $json.documentHash }) }}"
+      },
+      "id": "respond-success",
+      "name": "Respond: Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1130, 300]
+    }
+  ],
+  "connections": {
+    "Webhook: Agent Trigger": {
+      "main": [
+        [{ "node": "Validate Input", "type": "main", "index": 0 }]
+      ]
+    },
+    "Validate Input": {
+      "main": [
+        [{ "node": "NestJS: Hash Document", "type": "main", "index": 0 }]
+      ]
+    },
+    "NestJS: Hash Document": {
+      "main": [
+        [{ "node": "opBNB: Mint Attestation", "type": "main", "index": 0 }]
+      ]
+    },
+    "opBNB: Mint Attestation": {
+      "main": [
+        [{ "node": "Respond: Success", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "description": "Flow: [Webhook de Agente] -> [NestJS Hash Service] -> [opBNB Mint Attestation]",
+    "templateCredsSetupCompleted": false
+  },
+  "tags": [
+    { "name": "codex-id" },
+    { "name": "notary" },
+    { "name": "opbnb" }
+  ]
+}

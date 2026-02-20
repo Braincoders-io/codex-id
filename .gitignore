@@ -1,0 +1,12 @@
+# Secrets
+.env
+.env.local
+.env.*.local
+
+# Hardhat artifacts
+artifacts/
+cache/
+typechain-types/
+
+# Dependencies
+contracts/node_modules/
