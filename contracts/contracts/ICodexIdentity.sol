@@ -45,4 +45,26 @@ interface ICodexIdentity {
     /// @param attestationId The unique identifier of the attestation.
     /// @return valid Whether the attestation is currently valid.
     function verifyAttestation(bytes32 attestationId) external view returns (bool valid);
+
+    /// @notice Get full attestation data.
+    /// @param attestationId The unique identifier of the attestation.
+    function getAttestation(
+        bytes32 attestationId
+    )
+        external
+        view
+        returns (
+            address issuer,
+            address subject,
+            bytes32 documentHash,
+            bytes32 schemaId,
+            uint64 createdAt,
+            uint64 expiresAt,
+            bool revoked
+        );
+
+    /// @notice Get all attestation IDs for a subject.
+    /// @param subject The address of the identity holder.
+    /// @return Array of attestation IDs belonging to the subject.
+    function getSubjectAttestations(address subject) external view returns (bytes32[] memory);
 }

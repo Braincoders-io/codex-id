@@ -201,7 +201,7 @@ contract CodexIdentity is ICodexIdentity {
         return true;
     }
 
-    /// @notice Get full attestation data.
+    /// @inheritdoc ICodexIdentity
     function getAttestation(
         bytes32 attestationId
     )
@@ -230,7 +230,7 @@ contract CodexIdentity is ICodexIdentity {
         );
     }
 
-    /// @notice Get all attestation IDs for a subject.
+    /// @inheritdoc ICodexIdentity
     function getSubjectAttestations(
         address subject
     ) external view returns (bytes32[] memory) {
