@@ -65,6 +65,19 @@ contract CodexIdentity is ICodexIdentity {
     error AttestationAlreadyRevoked();
 
     // ──────────────────────────────────────────────
+    //  Admin Events
+    // ──────────────────────────────────────────────
+
+    /// @notice Emitted when an issuer is authorized.
+    event IssuerAdded(address indexed issuer);
+
+    /// @notice Emitted when an issuer is removed.
+    event IssuerRemoved(address indexed issuer);
+
+    /// @notice Emitted when ownership is transferred.
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+    // ──────────────────────────────────────────────
     //  Modifiers
     // ──────────────────────────────────────────────
 
@@ -94,11 +107,13 @@ contract CodexIdentity is ICodexIdentity {
     /// @notice Add an authorized issuer.
     function addIssuer(address issuer) external onlyOwner {
         authorizedIssuers[issuer] = true;
+        emit IssuerAdded(issuer);
     }
 
     /// @notice Remove an authorized issuer.
     function removeIssuer(address issuer) external onlyOwner {
         authorizedIssuers[issuer] = false;
+        emit IssuerRemoved(issuer);
     }
 
     /// @notice Transfer ownership of the contract.
@@ -106,6 +121,7 @@ contract CodexIdentity is ICodexIdentity {
         if (newOwner == address(0)) revert InvalidSubject();
         authorizedIssuers[newOwner] = true;
         authorizedIssuers[owner] = false;
+        emit OwnershipTransferred(owner, newOwner);
         owner = newOwner;
     }
 
