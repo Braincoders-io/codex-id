@@ -104,6 +104,8 @@ contract CodexIdentity is ICodexIdentity {
     /// @notice Transfer ownership of the contract.
     function transferOwnership(address newOwner) external onlyOwner {
         if (newOwner == address(0)) revert InvalidSubject();
+        authorizedIssuers[newOwner] = true;
+        authorizedIssuers[owner] = false;
         owner = newOwner;
     }
 
