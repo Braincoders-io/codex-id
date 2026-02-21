@@ -123,7 +123,7 @@ contract CodexIdentity is ICodexIdentity {
         if (expiresAt <= block.timestamp) revert InvalidExpiration();
 
         attestationId = keccak256(
-            abi.encodePacked(msg.sender, subject, documentHash, _nonce)
+            abi.encodePacked(msg.sender, subject, documentHash, _nonce, block.chainid)
         );
         _nonce++;
 
