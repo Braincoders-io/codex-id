@@ -10,3 +10,6 @@ typechain-types/
 
 # Dependencies
 contracts/node_modules/
+
+# Dev
+.claude/

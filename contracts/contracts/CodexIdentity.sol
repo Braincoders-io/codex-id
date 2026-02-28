@@ -10,12 +10,16 @@ import "./ICodexIdentity.sol";
 /**
  * @title CodexIdentity
  * @author Braincoders
- * @notice ERC-8004 Identity Registry for the Codex ID system.
+ * @notice ERC-8004 Identity Registry and BAP-578 Non-Fungible Agent (NFA) for Codex ID.
  *         Each AI agent is represented as an ERC-721 NFT whose URI resolves
  *         to an agent registration file (off-chain IPFS / HTTPS).
  *         Includes a Codex ID attestation extension for notarized identity proofs.
  *
  * @dev Extends ERC-721 with URIStorage and EIP-712 for agent wallet verification.
+ *      Implements the full ERC-8004 Identity Registry standard.
+ *      Implements the BAP-578 NFA core interface (lifecycle, logic, funding, state, metadata).
+ *      executeAction is stubbed — delegatecall logic is a post-v1 roadmap item.
+ *      BAP-578 events use tokenId instead of agent address (NFT-registry adaptation).
  *      Part of the three-registry ERC-8004 architecture alongside
  *      ReputationRegistry and ValidationRegistry.
  *
@@ -71,6 +75,25 @@ contract CodexIdentity is ICodexIdentity, ERC721URIStorage, EIP712 {
     mapping(uint256 => mapping(bytes32 => bytes)) private _metadata;
 
     // ──────────────────────────────────────────────
+    //  State — BAP-578
+    // ──────────────────────────────────────────────
+
+    /// @notice agentId => lifecycle status. Defaults to Active (enum value 0).
+    mapping(uint256 => Status) private _agentStatus;
+
+    /// @notice agentId => optional logic contract address for executeAction.
+    mapping(uint256 => address) private _logicAddress;
+
+    /// @notice agentId => BNB balance deposited via fundAgent().
+    mapping(uint256 => uint256) private _agentBalance;
+
+    /// @notice agentId => block.timestamp of last executeAction call.
+    mapping(uint256 => uint256) private _lastActionTimestamp;
+
+    /// @notice agentId => BAP-578 structured metadata.
+    mapping(uint256 => AgentMetadata) private _agentMetadata;
+
+    // ──────────────────────────────────────────────
     //  State — Attestations (Codex ID extension)
     // ──────────────────────────────────────────────
 
@@ -99,6 +122,12 @@ contract CodexIdentity is ICodexIdentity, ERC721URIStorage, EIP712 {
     error ReservedMetadataKey();
     error InvalidSignature();
     error SignatureExpired();
+    // BAP-578 errors
+    error AgentPaused();
+    error AgentTerminated();
+    error InvalidStatusTransition();
+    error ExecuteActionNotImplemented();
+    error WithdrawFailed();
 
     // ──────────────────────────────────────────────
     //  Modifiers
@@ -201,8 +230,10 @@ contract CodexIdentity is ICodexIdentity, ERC721URIStorage, EIP712 {
         uint256 agentId,
         string calldata newURI
     ) external onlyAgentOwnerOrOperator(agentId) {
+        if (_agentStatus[agentId] == Status.Terminated) revert AgentTerminated();
         _setTokenURI(agentId, newURI);
         emit URIUpdated(agentId, newURI, msg.sender);
+        emit MetadataUpdated(agentId, newURI); // BAP-578
     }
 
     // ──────────────────────────────────────────────
@@ -278,6 +309,107 @@ contract CodexIdentity is ICodexIdentity, ERC721URIStorage, EIP712 {
         uint256 agentId
     ) external onlyAgentOwnerOrOperator(agentId) {
         _setAgentWalletInternal(agentId, address(0));
+    }
+
+    // ──────────────────────────────────────────────
+    //  BAP-578: Lifecycle Management
+    // ──────────────────────────────────────────────
+
+    /// @inheritdoc ICodexIdentity
+    function pause(uint256 tokenId) external onlyAgentOwnerOrOperator(tokenId) {
+        if (_agentStatus[tokenId] != Status.Active) revert InvalidStatusTransition();
+        _agentStatus[tokenId] = Status.Paused;
+        emit StatusChanged(tokenId, Status.Paused);
+    }
+
+    /// @inheritdoc ICodexIdentity
+    function unpause(uint256 tokenId) external onlyAgentOwnerOrOperator(tokenId) {
+        if (_agentStatus[tokenId] != Status.Paused) revert InvalidStatusTransition();
+        _agentStatus[tokenId] = Status.Active;
+        emit StatusChanged(tokenId, Status.Active);
+    }
+
+    /// @inheritdoc ICodexIdentity
+    /// @dev Only the NFT owner (not operator) can terminate — it is irreversible.
+    ///      Returns any funded BNB to the caller before status is finalised.
+    ///      NOTE: Uses a push pattern. If owner is a contract without receive(),
+    ///      termination will revert — call getState() first to drain balance separately.
+    function terminate(uint256 tokenId) external {
+        if (msg.sender != ownerOf(tokenId)) revert AgentNotOwner();
+        if (_agentStatus[tokenId] == Status.Terminated) revert InvalidStatusTransition();
+
+        _agentStatus[tokenId] = Status.Terminated;
+        emit StatusChanged(tokenId, Status.Terminated);
+
+        // Return funded balance to owner
+        uint256 bal = _agentBalance[tokenId];
+        if (bal > 0) {
+            _agentBalance[tokenId] = 0;
+            (bool ok,) = msg.sender.call{value: bal}("");
+            if (!ok) revert WithdrawFailed();
+        }
+    }
+
+    // ──────────────────────────────────────────────
+    //  BAP-578: Logic & Funding
+    // ──────────────────────────────────────────────
+
+    /// @inheritdoc ICodexIdentity
+    /// @dev Stub — always reverts with ExecuteActionNotImplemented.
+    ///      Status guard is in place for when delegatecall is implemented post-v1.
+    function executeAction(uint256 tokenId, bytes calldata /*data*/) external {
+        if (_agentStatus[tokenId] == Status.Paused)     revert AgentPaused();
+        if (_agentStatus[tokenId] == Status.Terminated) revert AgentTerminated();
+        revert ExecuteActionNotImplemented();
+    }
+
+    /// @inheritdoc ICodexIdentity
+    function setLogicAddress(
+        uint256 tokenId,
+        address newLogic
+    ) external onlyAgentOwnerOrOperator(tokenId) {
+        if (_agentStatus[tokenId] == Status.Terminated) revert AgentTerminated();
+        address oldLogic = _logicAddress[tokenId];
+        _logicAddress[tokenId] = newLogic;
+        emit LogicUpgraded(tokenId, oldLogic, newLogic);
+    }
+
+    /// @inheritdoc ICodexIdentity
+    function fundAgent(uint256 tokenId) external payable {
+        if (_agentStatus[tokenId] == Status.Terminated) revert AgentTerminated();
+        ownerOf(tokenId); // reverts with ERC721NonexistentToken if token doesn't exist
+        _agentBalance[tokenId] += msg.value;
+        emit AgentFunded(tokenId, msg.sender, msg.value);
+    }
+
+    // ──────────────────────────────────────────────
+    //  BAP-578: State & Metadata
+    // ──────────────────────────────────────────────
+
+    /// @inheritdoc ICodexIdentity
+    function getState(uint256 tokenId) external view returns (State memory) {
+        return State({
+            balance:             _agentBalance[tokenId],
+            status:              _agentStatus[tokenId],
+            owner:               ownerOf(tokenId),
+            logicAddress:        _logicAddress[tokenId],
+            lastActionTimestamp: _lastActionTimestamp[tokenId]
+        });
+    }
+
+    /// @inheritdoc ICodexIdentity
+    function getAgentMetadata(uint256 tokenId) external view returns (AgentMetadata memory) {
+        return _agentMetadata[tokenId];
+    }
+
+    /// @inheritdoc ICodexIdentity
+    function updateAgentMetadata(
+        uint256 tokenId,
+        AgentMetadata calldata metadata
+    ) external onlyAgentOwnerOrOperator(tokenId) {
+        if (_agentStatus[tokenId] == Status.Terminated) revert AgentTerminated();
+        _agentMetadata[tokenId] = metadata;
+        emit MetadataUpdated(tokenId, tokenURI(tokenId));
     }
 
     // ──────────────────────────────────────────────
