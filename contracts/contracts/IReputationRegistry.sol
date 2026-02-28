@@ -83,6 +83,7 @@ interface IReputationRegistry {
     function revokeFeedback(uint256 agentId, uint64 feedbackIndex) external;
 
     /// @notice Agent appends a response to a feedback entry.
+    /// @dev Per ERC-8004 spec: only the agent owner or approved operator can call this.
     /// @param agentId The agent's numeric ID.
     /// @param clientAddress The address that submitted the original feedback.
     /// @param feedbackIndex The index of the feedback being responded to.
@@ -101,8 +102,10 @@ interface IReputationRegistry {
     // ──────────────────────────────────────────────
 
     /// @notice Get aggregated feedback summary for an agent.
+    /// @dev Per ERC-8004 spec, clientAddresses MUST be non-empty to prevent Sybil attacks.
+    ///      Reverts with ClientAddressesRequired if empty.
     /// @param agentId The agent's numeric ID.
-    /// @param clientAddresses List of client addresses to include (empty = all).
+    /// @param clientAddresses MUST be non-empty. List of client addresses to aggregate over.
     /// @param tag1 Filter by primary tag (empty = all).
     /// @param tag2 Filter by secondary tag (empty = all).
     /// @return count Number of feedback entries matched.

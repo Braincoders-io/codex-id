@@ -68,6 +68,7 @@ contract ReputationRegistry is IReputationRegistry {
     error AgentNotFound();
     error InvalidValueDecimals();
     error SubmitterIsAgentOwner();
+    error NotAgentOwnerOrOperator();
     error FeedbackNotFound();
     error NotFeedbackOwner();
     error FeedbackAlreadyRevoked();
@@ -169,6 +170,9 @@ contract ReputationRegistry is IReputationRegistry {
         string calldata responseURI,
         bytes32 responseHash
     ) external {
+        // Per ERC-8004 spec: only the agent owner or operator can respond to feedback
+        _requireAgentOwnerOrOperator(agentId);
+
         // feedbackIndex is 1-indexed
         if (feedbackIndex == 0) revert FeedbackNotFound();
         FeedbackEntry[] storage entries = _feedback[agentId][clientAddress];
@@ -339,6 +343,17 @@ contract ReputationRegistry is IReputationRegistry {
     ///      ownerOf() reverts with ERC721NonexistentToken if the token doesn't exist.
     function _requireAgentExists(uint256 agentId) internal view {
         IERC721(_identityRegistry).ownerOf(agentId);
+    }
+
+    /// @dev Per ERC-8004 spec: appendResponse MUST be called by the agent owner or operator.
+    function _requireAgentOwnerOrOperator(uint256 agentId) internal view {
+        IERC721 registry = IERC721(_identityRegistry);
+        address tokenOwner = registry.ownerOf(agentId); // reverts if nonexistent
+        if (
+            msg.sender != tokenOwner &&
+            !registry.isApprovedForAll(tokenOwner, msg.sender) &&
+            registry.getApproved(agentId) != msg.sender
+        ) revert NotAgentOwnerOrOperator();
     }
 
     /// @dev Per ERC-8004 spec: submitter MUST NOT be the agent owner or approved operator.
