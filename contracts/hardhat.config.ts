@@ -4,7 +4,11 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 
-const DEPLOYER_PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY || "0x" + "0".repeat(64);
+// Support both DEPLOYER_PRIVATE_KEY and the legacy PRIVATE_KEY env var name
+const DEPLOYER_PRIVATE_KEY =
+  process.env.DEPLOYER_PRIVATE_KEY ||
+  process.env.PRIVATE_KEY ||
+  "0x" + "0".repeat(64);
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -14,6 +18,7 @@ const config: HardhatUserConfig = {
         enabled: true,
         runs: 200,
       },
+      viaIR: true,
       evmVersion: "paris",
     },
   },

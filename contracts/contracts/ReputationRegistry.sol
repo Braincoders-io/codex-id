@@ -234,9 +234,16 @@ contract ReputationRegistry is IReputationRegistry {
         string[]  memory tag2s,
         bool[]    memory revokedStatuses
     ) {
-        address[] memory pool = clientAddresses.length > 0
-            ? clientAddresses
-            : _clients[agentId];
+        // Solidity cannot mix calldata and storage in a ternary — copy to memory explicitly
+        address[] memory pool;
+        if (clientAddresses.length > 0) {
+            pool = new address[](clientAddresses.length);
+            for (uint256 k = 0; k < clientAddresses.length; k++) {
+                pool[k] = clientAddresses[k];
+            }
+        } else {
+            pool = _clients[agentId];
+        }
 
         uint256 total = 0;
         for (uint256 i = 0; i < pool.length; i++) {

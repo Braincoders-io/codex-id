@@ -1,0 +1,24 @@
+{
+  "network": "opBNB Testnet",
+  "chainId": 5611,
+  "deployedAt": "2026-03-01T12:06:27.156Z",
+  "deployer": "0x7d2Fa1Ced7b9574C7B17B3d798Eb30e651A07f1F",
+  "contracts": {
+    "CodexIdentity": "0x8E036e205ff434D62F132Cf2471eC868728205Cb",
+    "ReputationRegistry": "0x1C32d4625916a23789C635861A49E4E8Aed13E6e",
+    "ValidationRegistry": "0x89D9e3e42cD8655eb94e303ec0Ab7307dcAdDB2F"
+  },
+  "transactions": {
+    "register": "0x3b81d7cdf6b3adf6367209ee5d83a285b9f9e7b1ecfab0afb91aedc676bd9774",
+    "createAttestation": "0x9f815c6aabae231ef68d108e1acf536fc068dbad5891a42c965df44cdfcaf411",
+    "updateMetadata": "0xa87c059f4ccd896fa9744dfdf97eb990ffb68fc8c8ad277ae08de339aebebde1",
+    "validationRequest": "0x09f62bcf005455e8139576ab13c3777426940acfbcbd7bccccc05e2630f621f1",
+    "giveFeedback": "0x9553c61118eda023feeb6118eb2085abbdb207cdde31355a7cc1e218d030ed6c"
+  },
+  "demo": {
+    "agentId": "1",
+    "attestationId": "0x4b9179f7a9b8607524932bd486899b6f38db3b21fb251cf2a9b8fd590cf26936",
+    "clientWallet": "0xd7c6Ea6eAb644202A6c29f9650A483dA30ae93d3"
+  },
+  "explorer": "https://testnet.opbnbscan.com"
+}

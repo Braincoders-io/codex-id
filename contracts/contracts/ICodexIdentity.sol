@@ -3,7 +3,7 @@ pragma solidity ^0.8.24;
 
 /**
  * @title ICodexIdentity
- * @notice Interface for the Codex ID Identity Registry.
+ * @notice Interface for the Identity Registry.
  *         Implements the ERC-8004 Identity Registry standard.
  *         Part of the three-registry ERC-8004 architecture alongside
  *         IReputationRegistry and IValidationRegistry.
@@ -12,7 +12,7 @@ pragma solidity ^0.8.24;
  *      agentId = ERC-721 tokenId, assigned incrementally at registration.
  *      Implements ERC-8004 Identity Registry and BAP-578 NFA Token Standard.
  *      BAP-578 events use tokenId instead of agent address (NFT-registry adaptation).
- *      Attestation functions are a Codex ID extension beyond both standards.
+ *      Attestation functions are an extension beyond both standards.
  */
 interface ICodexIdentity {
 

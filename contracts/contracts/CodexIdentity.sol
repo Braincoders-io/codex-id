@@ -10,7 +10,7 @@ import "./ICodexIdentity.sol";
 /**
  * @title CodexIdentity
  * @author Braincoders
- * @notice ERC-8004 Identity Registry and BAP-578 Non-Fungible Agent (NFA) for Codex ID.
+ * @notice ERC-8004 Identity Registry and BAP-578 Non-Fungible Agent (NFA).
  *         Each AI agent is represented as an ERC-721 NFT whose URI resolves
  *         to an agent registration file (off-chain IPFS / HTTPS).
  *         Includes a Codex ID attestation extension for notarized identity proofs.
@@ -158,7 +158,7 @@ contract CodexIdentity is ICodexIdentity, ERC721URIStorage, EIP712 {
     // ──────────────────────────────────────────────
 
     constructor()
-        ERC721("Codex ID Agent", "CXID")
+        ERC721("Codex ID Agent", "CXID") // TODO: update name/symbol to final brand before mainnet
         EIP712("CodexIdentity", "1")
     {
         owner = msg.sender;

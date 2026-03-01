@@ -1,0 +1,229 @@
+================================================================
+CODEX ID — Decentralized AI Agent Identity & Trust Registry
+BNB Ignite Challenge Hackathon Submission
+================================================================
+
+TEAM
+----
+Braincoders
+https://www.braincoders.io
+
+NETWORK
+-------
+opBNB Testnet | Chain ID: 5611
+Deployed: 2026-03-01
+Explorer: https://testnet.opbnbscan.com
+
+
+----------------------------------------------------------------
+THE PROBLEM
+----------------------------------------------------------------
+AI agents are proliferating across Web3 — but there is no
+standard way to verify who an agent is, whether it can be
+trusted, or what its track record is.
+
+Today, AI agents operate without:
+  - A permanent, verifiable on-chain identity
+  - A trustless reputation system built from real interactions
+  - Third-party validation of their capabilities
+  - A standard lifecycle (active, paused, terminated)
+
+This creates a trust gap that blocks AI agents from being used
+in high-stakes, permissionless, on-chain environments.
+
+
+----------------------------------------------------------------
+THE SOLUTION: CODEX ID
+----------------------------------------------------------------
+Codex ID is a decentralized registry that gives every AI agent
+a verifiable on-chain identity, trust score, and lifecycle —
+governed by open standards.
+
+Each AI agent is represented as an ERC-721 NFT (Non-Fungible
+Token). The tokenId IS the agentId. Whoever holds the NFT owns
+the agent and controls its identity, reputation, and lifecycle.
+
+Three registries work together under the ERC-8004 standard:
+
+  1. IDENTITY REGISTRY (CodexIdentity)
+     - Mints the agent as an NFT via register()
+     - Stores the agent's URI pointing to registration metadata
+     - Issues notarized identity attestations (tamper-proof,
+       expirable, revocable) via createAttestation()
+     - Implements full BAP-578 NFA lifecycle: pause, unpause,
+       terminate, fundAgent, setLogicAddress, executeAction
+     - Supports structured BAP-578 metadata: persona,
+       experience, voiceHash, animationURI, vaultURI, vaultHash
+     - Agent wallet is verifiable via EIP-712 signed proof +
+       ERC-1271 smart contract wallet fallback
+
+  2. REPUTATION REGISTRY (ReputationRegistry)
+     - Clients (NOT the agent owner) submit scored feedback
+       via giveFeedback(agentId, score, tag1, tag2, ...)
+     - Feedback is permanently stored on-chain (1-indexed)
+     - Agent owner can respond via appendResponse()
+     - readAllFeedback() supports filtering by tag and
+       revocation status
+     - getSummary() returns aggregate score across clients
+
+  3. VALIDATION REGISTRY (ValidationRegistry)
+     - Agent owner requests third-party assessment via
+       validationRequest(validator, agentId, requestURI, hash)
+     - Designated validator responds with a 0-100 score via
+       validationResponse()
+     - getSummary() returns average score across validators
+     - All request/response data is permanently on-chain
+
+
+----------------------------------------------------------------
+STANDARDS COMPLIANCE
+----------------------------------------------------------------
+  ERC-721        Full implementation via ERC721URIStorage
+                 Each AI agent = unique NFT, tokenId = agentId
+                 Agent wallet auto-cleared on NFT transfer
+
+  ERC-8004       28/28 requirements — Three-registry pattern
+  (Trustless     Identity Registry: register, setAgentURI,
+  Agents)        setMetadata, getMetadata, setAgentWallet,
+                 getAgentWallet, createAttestation,
+                 verifyAttestation, revokeAttestation
+                 Reputation Registry: giveFeedback,
+                 revokeFeedback, appendResponse,
+                 readFeedback, readAllFeedback, getSummary,
+                 getLastIndex, getResponseCount, getClients
+                 Validation Registry: validationRequest,
+                 validationResponse, getValidationStatus,
+                 getSummary, getAgentValidations,
+                 getValidatorRequests
+
+  BAP-578        17/17 core requirements — Non-Fungible Agent
+  (NFA Token     Status enum: Active / Paused / Terminated
+  Standard)      State struct: balance, status, owner,
+                 logicAddress, lastActionTimestamp
+                 AgentMetadata: persona, experience,
+                 voiceHash, animationURI, vaultURI, vaultHash
+                 Lifecycle: pause(), unpause(), terminate()
+                 Funding: fundAgent() payable
+                 Logic: setLogicAddress(), executeAction()
+                 Events: StatusChanged, LogicUpgraded,
+                 AgentFunded, MetadataUpdated, ActionExecuted
+
+  EIP-712        Typed structured data for setAgentWallet —
+                 requires the new wallet to sign a typed
+                 message proving control
+
+  ERC-1271       Smart contract wallet signature fallback
+                 in setAgentWallet()
+
+
+----------------------------------------------------------------
+LIVE DEPLOYMENT — opBNB TESTNET
+----------------------------------------------------------------
+Deployer:    0x7d2Fa1Ced7b9574C7B17B3d798Eb30e651A07f1F
+
+CONTRACT ADDRESSES
+  CodexIdentity:
+    0x8E036e205ff434D62F132Cf2471eC868728205Cb
+    https://testnet.opbnbscan.com/address/0x8E036e205ff434D62F132Cf2471eC868728205Cb
+
+  ReputationRegistry:
+    0x1C32d4625916a23789C635861A49E4E8Aed13E6e
+    https://testnet.opbnbscan.com/address/0x1C32d4625916a23789C635861A49E4E8Aed13E6e
+
+  ValidationRegistry:
+    0x89D9e3e42cD8655eb94e303ec0Ab7307dcAdDB2F
+    https://testnet.opbnbscan.com/address/0x89D9e3e42cD8655eb94e303ec0Ab7307dcAdDB2F
+
+ON-CHAIN TRANSACTIONS (5 demo transactions executed)
+  Tx 1 — register() — Mint AI Agent NFT (tokenId=1)
+    https://testnet.opbnbscan.com/tx/0x3b81d7cdf6b3adf6367209ee5d83a285b9f9e7b1ecfab0afb91aedc676bd9774
+
+  Tx 2 — createAttestation() — Notarize identity (valid until 2027-03-01)
+    https://testnet.opbnbscan.com/tx/0x9f815c6aabae231ef68d108e1acf536fc068dbad5891a42c965df44cdfcaf411
+
+  Tx 3 — updateAgentMetadata() — Set BAP-578 persona/experience/vault
+    https://testnet.opbnbscan.com/tx/0xa87c059f4ccd896fa9744dfdf97eb990ffb68fc8c8ad277ae08de339aebebde1
+
+  Tx 4 — validationRequest() — Request 3rd-party validator assessment
+    https://testnet.opbnbscan.com/tx/0x09f62bcf005455e8139576ab13c3777426940acfbcbd7bccccc05e2630f621f1
+
+  Tx 5 — giveFeedback() — Submit 95/100 reputation score (client wallet)
+    https://testnet.opbnbscan.com/tx/0x9553c61118eda023feeb6118eb2085abbdb207cdde31355a7cc1e218d030ed6c
+
+ON-CHAIN VERIFICATION RESULTS
+  ownerOf(1)              = 0x7d2Fa1Ced7b9574C7B17B3d798Eb30e651A07f1F ✓
+  getState(1).status      = Active                                      ✓
+  verifyAttestation()     = true                                        ✓
+  getLastIndex() feedbacks = 1                                          ✓
+  getAgentValidations()   = 1                                           ✓
+
+
+----------------------------------------------------------------
+GITHUB REPOSITORY
+----------------------------------------------------------------
+https://github.com/Braincoders-io/codex-id
+
+
+----------------------------------------------------------------
+DEMO REEL / VIDEO
+----------------------------------------------------------------
+https://www.youtube.com/watch?v=pdTY9bV6kPE
+(Braincoders YouTube Channel)
+
+
+----------------------------------------------------------------
+TECH STACK
+----------------------------------------------------------------
+  Smart Contracts  Solidity 0.8.24
+  Framework        Hardhat + TypeScript
+  Libraries        OpenZeppelin v5 (ERC-721, EIP-712, ERC-1271)
+  Network          opBNB Testnet (OP Stack L2 on BNB Chain)
+  Backend          NestJS
+  Automation       n8n workflows
+
+
+----------------------------------------------------------------
+WHY opBNB
+----------------------------------------------------------------
+opBNB is an OP Stack Layer 2 on BNB Chain that provides:
+  - Ultra-low transaction fees (< $0.001 per tx)
+  - Fast block times for real-time agent interactions
+  - EVM compatibility — all OpenZeppelin contracts work as-is
+  - Strong ecosystem alignment with BNB Chain AI agent vision
+
+The low cost on opBNB makes it viable for AI agents to record
+every interaction, feedback, and validation on-chain — which
+would be prohibitively expensive on mainnet L1 chains.
+
+
+----------------------------------------------------------------
+ARCHITECTURE SUMMARY
+----------------------------------------------------------------
+
+  User/App
+     |
+     v
+  CodexIdentity (ERC-721 NFT Registry)
+  - register() → mint NFT, agentId = tokenId
+  - createAttestation() → on-chain identity proof
+  - updateAgentMetadata() → BAP-578 structured data
+  - pause() / unpause() / terminate() → lifecycle
+  - fundAgent() → BNB deposit for agent operations
+     |
+     +---> ReputationRegistry
+     |     - giveFeedback() → client scores (NOT owner)
+     |     - appendResponse() → agent replies
+     |     - getSummary() → aggregate reputation score
+     |
+     +---> ValidationRegistry
+           - validationRequest() → owner requests review
+           - validationResponse() → validator scores 0-100
+           - getSummary() → average validation score
+
+All three registries are linked via ERC-721 ownerOf() —
+no separate registration needed in Reputation or Validation.
+The NFT IS the agent's identity anchor.
+
+================================================================
+END OF SUMMARY
+================================================================
