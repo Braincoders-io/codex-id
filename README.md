@@ -5,6 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/Braincoders-io/codex-id/blob/main/LICENSE)
 [![GitHub](https://img.shields.io/badge/GitHub-Braincoders--io%2Fcodex--id-blue?logo=github)](https://github.com/Braincoders-io/codex-id)
 [![Website](https://img.shields.io/badge/Website-braincoders.io-green)](https://www.braincoders.io)
+[![Sourcify](https://img.shields.io/badge/Sourcify-Exact%20Match-brightgreen)](https://repo.sourcify.dev/5611/0x8E036e205ff434D62F132Cf2471eC868728205Cb)
 
 Codex ID is a decentralized registry for AI agents. Each agent is minted as an NFT with an on-chain identity, attestation-based trust proofs, a reputation score built from client feedback, and third-party validation — all governed by open standards.
 
@@ -163,19 +164,54 @@ The deploy script runs **4 phases automatically**:
 ✓ getAgentValidations() count = 1
 ```
 
-### Contract Verification on Explorer
+### Source Code Verification
+
+All three contracts are verified on **[Sourcify](https://sourcify.dev)** with an `exact_match`
+on both runtime **and** creation bytecode. That is Sourcify's strongest grade: the source in
+this repository compiles byte-for-byte to the code deployed on opBNB, metadata included.
+
+| Contract | Verification | Deployment tx | Block |
+|---|---|---|---|
+| CodexIdentity | [Exact Match](https://repo.sourcify.dev/5611/0x8E036e205ff434D62F132Cf2471eC868728205Cb) | [0x90ad7529...](https://testnet.opbnbscan.com/tx/0x90ad7529860e6ff8cc77f558487181cdbf1d1c816bd497cfb318ee8db6ff5068) | 134,229,776 |
+| ReputationRegistry | [Exact Match](https://repo.sourcify.dev/5611/0x1C32d4625916a23789C635861A49E4E8Aed13E6e) | [0x31e74716...](https://testnet.opbnbscan.com/tx/0x31e74716ef6462771c63f6fca87254cf0d288d6a76013d15aafcad831360dd49) | 134,229,786 |
+| ValidationRegistry | [Exact Match](https://repo.sourcify.dev/5611/0x89D9e3e42cD8655eb94e303ec0Ab7307dcAdDB2F) | [0x8a6a2fae...](https://testnet.opbnbscan.com/tx/0x8a6a2fae3c326f28e6afea94f28d7e05356851fadf83ce0a57d32b2d568a9e88) | 134,229,795 |
+
+Verified 2026-10-29 · `solc 0.8.24+commit.e11b9ed9` · optimizer on (200 runs) · viaIR · EVM `paris`
+
+#### Check it yourself
+
+This asks Sourcify directly — nothing of ours is in the path:
+
 ```bash
+curl -s https://sourcify.dev/server/v2/contract/5611/0x8E036e205ff434D62F132Cf2471eC868728205Cb
+```
+
+Look for `"match": "exact_match"`. To confirm the verified source is the same source you are
+reading here, compare Sourcify's stored files against this repository:
+
+```bash
+curl -s "https://sourcify.dev/server/v2/contract/5611/0x8E036e205ff434D62F132Cf2471eC868728205Cb?fields=sources" \
+  | python3 -c "import json,sys;[open('/tmp/'+k.split('/')[-1],'w').write(v['content']) for k,v in json.load(sys.stdin)['sources'].items()]"
+diff /tmp/CodexIdentity.sol contracts/contracts/CodexIdentity.sol && echo "identical"
+```
+
+#### opbnbscan
+
+opbnbscan runs its own verification database and does not index Sourcify, so it still reports
+these contracts as unverified. That badge needs a free API key from
+[NodeReal](https://nodereal.io); `contracts/hardhat.config.ts` already contains the
+`customChains` entry and reads the key from `NODEREAL_API_KEY`:
+
+```bash
+# add NODEREAL_API_KEY=... to contracts/.env first
 cd contracts
-
-# CodexIdentity (no constructor args)
 npx hardhat verify --network opbnbTestnet 0x8E036e205ff434D62F132Cf2471eC868728205Cb
-
-# ReputationRegistry (constructor arg: CodexIdentity address)
 npx hardhat verify --network opbnbTestnet 0x1C32d4625916a23789C635861A49E4E8Aed13E6e 0x8E036e205ff434D62F132Cf2471eC868728205Cb
-
-# ValidationRegistry (constructor arg: CodexIdentity address)
 npx hardhat verify --network opbnbTestnet 0x89D9e3e42cD8655eb94e303ec0Ab7307dcAdDB2F 0x8E036e205ff434D62F132Cf2471eC868728205Cb
 ```
+
+Note: opBNB is not covered by Etherscan's multichain (v2) API and `opbnb-testnet.bscscan.com`
+does not resolve, so NodeReal is the only route to an opbnbscan badge.
 
 ---
 
