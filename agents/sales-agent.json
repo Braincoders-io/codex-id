@@ -1,0 +1,35 @@
+{
+  "name": "Sales Agent",
+  "description": "Qualifies inbound leads, answers product questions and books meetings for tenants on the Orvium platform.",
+  "version": "1.0.0",
+  "agentId": 2,
+  "agentURI": "https://raw.githubusercontent.com/Braincoders-io/codex-id/main/agents/sales-agent.json",
+  "skills": [
+    "lead-qualification",
+    "product-q-and-a",
+    "meeting-scheduling"
+  ],
+  "registry": {
+    "chainId": 5611,
+    "network": "opBNB Testnet",
+    "identityRegistry": "0x8E036e205ff434D62F132Cf2471eC868728205Cb",
+    "reputationRegistry": "0x1C32d4625916a23789C635861A49E4E8Aed13E6e",
+    "validationRegistry": "0x89D9e3e42cD8655eb94e303ec0Ab7307dcAdDB2F"
+  },
+  "owner": {
+    "wallet": "0x7d2Fa1Ced7b9574C7B17B3d798Eb30e651A07f1F",
+    "entity": "Braincoders Software Solutions FZCO",
+    "ownerVerified": true,
+    "verificationSchema": "dactilar.owner.verified.v1",
+    "note": "Owner verification is issued at company level. Every agent owned by this wallet inherits it."
+  },
+  "platform": {
+    "name": "Orvium.ai",
+    "operator": "Braincoders Software Solutions FZCO",
+    "model": "multi-agent, multi-tenant"
+  },
+  "trustModels": [
+    "owner-attestation",
+    "feedback"
+  ]
+}

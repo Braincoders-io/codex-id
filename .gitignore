@@ -13,3 +13,7 @@ contracts/node_modules/
 
 # Dev
 .claude/
+# internal pitch analysis — not for the public repo
+DACTILAR-standards-and-slide-brief.md
+VALIDATION-opbnb-2026-10-23.md
+pitch-assets/

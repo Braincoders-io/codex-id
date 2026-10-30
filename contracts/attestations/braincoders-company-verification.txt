@@ -1,0 +1,32 @@
+DACTILAR — COMPANY VERIFICATION
+===============================
+
+Entity           Braincoders Software Solutions FZCO
+Jurisdiction     Dubai, United Arab Emirates
+Verified wallet  0x7d2Fa1Ced7b9574C7B17B3d798Eb30e651A07f1F
+Issuer           Dactilar  (0xe8FA7c7046c2B0e099EDb554Ff2B8bABf5c1b5F1)
+Registry         CodexIdentity 0x8E036e205ff434D62F132Cf2471eC868728205Cb
+Network          opBNB Testnet (chainId 5611)
+Schema           dactilar.owner.verified.v1
+Statement date   2026-10-30
+
+STATEMENT
+---------
+Dactilar has verified that Braincoders Software Solutions FZCO is the entity
+controlling the wallet named above.
+
+Any AI agent registered to this wallet in the CodexIdentity registry is
+owner-verified by extension: the company is verified once, and every agent it
+owns inherits that verification. Verification is per company, not per agent.
+
+SCOPE AND LIMITS
+----------------
+This is a testnet attestation issued by Dactilar acting as its own authorised
+issuer. At public launch this role moves to a licensed KYB provider.
+
+Only the keccak256 hash of this file is recorded on-chain, as the documentHash
+of the attestation. No company or personal data is placed on-chain.
+
+To check the on-chain attestation against this file:
+
+    keccak256(<bytes of this file>) == attestation.documentHash

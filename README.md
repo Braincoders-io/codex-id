@@ -166,15 +166,15 @@ The deploy script runs **4 phases automatically**:
 
 ### Source Code Verification
 
-All three contracts are verified on **[Sourcify](https://sourcify.dev)** with an `exact_match`
-on both runtime **and** creation bytecode. That is Sourcify's strongest grade: the source in
-this repository compiles byte-for-byte to the code deployed on opBNB, metadata included.
+All three contracts are verified on **opBNBScan** and on **[Sourcify](https://sourcify.dev)**,
+both reporting an **exact match** on runtime and creation bytecode. The source in this
+repository compiles byte-for-byte to the code deployed on opBNB, metadata included.
 
-| Contract | Verification | Deployment tx | Block |
-|---|---|---|---|
-| CodexIdentity | [Exact Match](https://repo.sourcify.dev/5611/0x8E036e205ff434D62F132Cf2471eC868728205Cb) | [0x90ad7529...](https://testnet.opbnbscan.com/tx/0x90ad7529860e6ff8cc77f558487181cdbf1d1c816bd497cfb318ee8db6ff5068) | 134,229,776 |
-| ReputationRegistry | [Exact Match](https://repo.sourcify.dev/5611/0x1C32d4625916a23789C635861A49E4E8Aed13E6e) | [0x31e74716...](https://testnet.opbnbscan.com/tx/0x31e74716ef6462771c63f6fca87254cf0d288d6a76013d15aafcad831360dd49) | 134,229,786 |
-| ValidationRegistry | [Exact Match](https://repo.sourcify.dev/5611/0x89D9e3e42cD8655eb94e303ec0Ab7307dcAdDB2F) | [0x8a6a2fae...](https://testnet.opbnbscan.com/tx/0x8a6a2fae3c326f28e6afea94f28d7e05356851fadf83ce0a57d32b2d568a9e88) | 134,229,795 |
+| Contract | opBNBScan | Sourcify | Deployment tx | Block |
+|---|---|---|---|---|
+| CodexIdentity | [Verified](https://testnet.opbnbscan.com/address/0x8E036e205ff434D62F132Cf2471eC868728205Cb#code) | [Exact Match](https://repo.sourcify.dev/5611/0x8E036e205ff434D62F132Cf2471eC868728205Cb) | [0x90ad7529...](https://testnet.opbnbscan.com/tx/0x90ad7529860e6ff8cc77f558487181cdbf1d1c816bd497cfb318ee8db6ff5068) | 134,229,776 |
+| ReputationRegistry | [Verified](https://testnet.opbnbscan.com/address/0x1C32d4625916a23789C635861A49E4E8Aed13E6e#code) | [Exact Match](https://repo.sourcify.dev/5611/0x1C32d4625916a23789C635861A49E4E8Aed13E6e) | [0x31e74716...](https://testnet.opbnbscan.com/tx/0x31e74716ef6462771c63f6fca87254cf0d288d6a76013d15aafcad831360dd49) | 134,229,786 |
+| ValidationRegistry | [Verified](https://testnet.opbnbscan.com/address/0x89D9e3e42cD8655eb94e303ec0Ab7307dcAdDB2F#code) | [Exact Match](https://repo.sourcify.dev/5611/0x89D9e3e42cD8655eb94e303ec0Ab7307dcAdDB2F) | [0x8a6a2fae...](https://testnet.opbnbscan.com/tx/0x8a6a2fae3c326f28e6afea94f28d7e05356851fadf83ce0a57d32b2d568a9e88) | 134,229,795 |
 
 Verified 2026-10-29 · `solc 0.8.24+commit.e11b9ed9` · optimizer on (200 runs) · viaIR · EVM `paris`
 
@@ -197,10 +197,10 @@ diff /tmp/CodexIdentity.sol contracts/contracts/CodexIdentity.sol && echo "ident
 
 #### opbnbscan
 
-opbnbscan runs its own verification database and does not index Sourcify, so it still reports
-these contracts as unverified. That badge needs a free API key from
-[NodeReal](https://nodereal.io); `contracts/hardhat.config.ts` already contains the
-`customChains` entry and reads the key from `NODEREAL_API_KEY`:
+opbnbscan runs its own verification database and does not index Sourcify, so it is verified
+there separately. It needs a free API key from [NodeReal](https://nodereal.io) (the company
+that operates opbnbscan); `contracts/hardhat.config.ts` contains the `customChains` entry and
+reads the key from `NODEREAL_API_KEY`:
 
 ```bash
 # add NODEREAL_API_KEY=... to contracts/.env first
@@ -212,6 +212,122 @@ npx hardhat verify --network opbnbTestnet 0x89D9e3e42cD8655eb94e303ec0Ab7307dcAd
 
 Note: opBNB is not covered by Etherscan's multichain (v2) API and `opbnb-testnet.bscscan.com`
 does not resolve, so NodeReal is the only route to an opbnbscan badge.
+
+---
+
+## Verify It Yourself
+
+Every claim below is checkable from a clean clone. **No private key is required** for any
+command in this section — the read-only scripts run with no `.env` at all.
+
+```bash
+git clone https://github.com/Braincoders-io/codex-id && cd codex-id/contracts && npm install
+```
+
+If your network blocks the default opBNB RPC, point it elsewhere — any opBNB testnet endpoint
+works, and no other change is needed:
+
+```bash
+export OPBNB_TESTNET_RPC=https://opbnb-testnet-rpc.publicnode.com
+```
+
+### 1. The platform check — one command per agent
+
+This is the question a platform asks before letting an agent act: *who owns it, is that owner
+verified, is it still active, and what is its track record?*
+
+```bash
+AGENT_ID=2 npx hardhat run scripts/check-agent.ts --network opbnbTestnet
+```
+
+```
+  Agent #2  —  opBNB Testnet (chainId 5611)
+
+    owner            0x7d2Fa1Ced7b9574C7B17B3d798Eb30e651A07f1F
+    owner verified   true  (attestation 0xdd5e860d…)
+    attested by      0xe8FA7c7046c2B0e099EDb554Ff2B8bABf5c1b5F1  (independent of owner)
+    status           Active
+    reputation       92/100  from 1 review(s)
+
+    DECISION         ALLOWED   (policy: Active + owner verified + score >= 80)
+```
+
+The `attested by` line prints **⚠ SELF-ATTESTED** if an owner ever attests to itself, so a
+circular trust claim is visible rather than hidden.
+
+### 2. The live state
+
+| Agent | Name | Status | Owner verified | Score | Decision |
+|---|---|---|---|---|---|
+| #1 | Demo agent | Active | yes | 95 | ALLOWED |
+| #2 | Sales Agent | Active | yes | 92 | ALLOWED |
+| #3 | Marketing Agent | Active | yes | 88 | ALLOWED |
+| #4 | Support Agent | **Paused** | yes | 91 | **DENIED** |
+
+Agent #4 is verified and well reviewed. It is denied **only** because its owner paused it —
+the kill switch isolated from every other signal.
+
+```bash
+npx hardhat run scripts/stats.ts --network opbnbTestnet
+```
+
+### 3. Owner verification is per company, not per agent
+
+Attestations are keyed by **address**, so one company-level attestation covers every agent
+that company owns. Agents #2, #3 and #4 have no attestation of their own — they inherit
+`0xdd5e860d…`, issued to the owning wallet.
+
+The attestation records only a hash. The document it attests to is in this repository, so
+anyone can recompute that hash and compare it to the chain:
+
+```bash
+node -e '
+const {ethers}=require("ethers"), fs=require("fs");
+const p=new ethers.JsonRpcProvider("https://opbnb-testnet-rpc.publicnode.com");
+const c=new ethers.Contract("0x8E036e205ff434D62F132Cf2471eC868728205Cb",
+  ["function getAttestation(bytes32) view returns (address issuer,address subject,bytes32 documentHash,bytes32 schemaId,uint64 createdAt,uint64 expiresAt,bool revoked)"],p);
+c.getAttestation("0xdd5e860d1d0f3880a33bf814823823694974906135e1bb15e446cfbe3ca36d05").then(a=>{
+  const local=ethers.keccak256(fs.readFileSync("attestations/braincoders-company-verification.txt"));
+  console.log("on-chain :",a.documentHash);
+  console.log("this repo:",local);
+  console.log("match    :",a.documentHash===local);
+});'
+```
+
+### 4. The agent wallet is bound by signature
+
+`setAgentWallet` only succeeds if the wallet being bound signed an EIP-712 message consenting
+to it. The owner pays the gas; the wallet never needs funds. `_update` clears the binding on
+transfer, so selling an agent cannot leave payments flowing to the previous owner.
+
+```bash
+node -e '
+const {ethers}=require("ethers");
+const p=new ethers.JsonRpcProvider("https://opbnb-testnet-rpc.publicnode.com");
+new ethers.Contract("0x8E036e205ff434D62F132Cf2471eC868728205Cb",
+  ["function getAgentWallet(uint256) view returns (address)"],p)
+  .getAgentWallet(1).then(w=>console.log("agent #1 payment wallet:",w));'
+```
+
+### 5. Source code
+
+Both registries report an exact match — see [Source Code Verification](#source-code-verification)
+above for the links and the byte-for-byte comparison against this repository.
+
+### Scope and limits
+
+Stated plainly, so nothing here is read as more than it is:
+
+- **This is opBNB testnet.** No mainnet deployment exists yet.
+- **Dactilar is currently its own authorised issuer.** The architecture separates the issuer
+  from the agent owner, and the registry shows which issuer signed off, so anyone can judge
+  whether to trust them. At public launch that role moves to a licensed KYB provider.
+- **Reputation scores are seeded demo data**, submitted from a wallet created for the purpose
+  (see `scripts/seed-demo-state.ts`, which says so in its header). The feedback mechanism is
+  real and on-chain; the reviewers are not customers.
+- **`executeAction` is not implemented.** BAP-578 lifecycle (pause / unpause / terminate),
+  structs and state are implemented; the execution hook reverts by design for now.
+- **The contracts are not upgradeable** and have not had an external security audit.
 
 ---
 

@@ -1,0 +1,27 @@
+DACTILAR — AGENT OWNERSHIP STATEMENT
+====================================
+
+Agent            #1
+Registry         CodexIdentity 0x8E036e205ff434D62F132Cf2471eC868728205Cb
+Network          opBNB Testnet (chainId 5611)
+Owner wallet     0x7d2Fa1Ced7b9574C7B17B3d798Eb30e651A07f1F
+Entity           Braincoders
+Contact          lorgio@braincoders.io
+Statement date   2026-10-30
+
+STATEMENT
+---------
+Braincoders confirms that the owner wallet named above is under its control
+and is the registered owner of Dactilar agent #1 in the CodexIdentity registry
+on opBNB testnet.
+
+NOTE
+----
+Only the keccak256 hash of this file is recorded on-chain, as the documentHash
+of an attestation under schema "dactilar.owner.verified.v1". The attestation
+proves that an authorised issuer saw this exact document; it does not place the
+document itself on-chain.
+
+To check the on-chain attestation against this file:
+
+    keccak256(<bytes of this file>) == attestation.documentHash

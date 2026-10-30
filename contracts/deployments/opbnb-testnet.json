@@ -27,7 +27,7 @@
     "ValidationRegistry": "0x8a6a2fae3c326f28e6afea94f28d7e05356851fadf83ce0a57d32b2d568a9e88"
   },
   "verification": {
-    "provider": "Sourcify",
+    "provider": "opBNBScan + Sourcify",
     "verifiedAt": "2026-10-29T14:59:33Z",
     "match": "exact_match (runtime + creation)",
     "compiler": "solc 0.8.24+commit.e11b9ed9, optimizer on/200, viaIR, paris",
@@ -37,6 +37,11 @@
       "ValidationRegistry": "https://repo.sourcify.dev/5611/0x89D9e3e42cD8655eb94e303ec0Ab7307dcAdDB2F"
     },
     "checkCommand": "curl -s https://sourcify.dev/server/v2/contract/5611/<address>",
-    "opbnbscan": "not yet verified \u2014 needs a NodeReal API key (NODEREAL_API_KEY)"
+    "opbnbscan": "verified (exact match) \u2014 2026-10-30",
+    "opbnbscanPages": {
+      "CodexIdentity": "https://testnet.opbnbscan.com/address/0x8E036e205ff434D62F132Cf2471eC868728205Cb#code",
+      "ReputationRegistry": "https://testnet.opbnbscan.com/address/0x1C32d4625916a23789C635861A49E4E8Aed13E6e#code",
+      "ValidationRegistry": "https://testnet.opbnbscan.com/address/0x89D9e3e42cD8655eb94e303ec0Ab7307dcAdDB2F#code"
+    }
   }
 }

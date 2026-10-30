@@ -16,6 +16,13 @@ const accounts = DEPLOYER_PRIVATE_KEY ? [DEPLOYER_PRIVATE_KEY] : [];
 // Without the key, `hardhat verify` still publishes to Sourcify.
 const NODEREAL_API_KEY = process.env.NODEREAL_API_KEY;
 
+// RPC endpoints are overridable so a blocked or rate-limited provider can be
+// swapped without editing this file (see .env.example).
+const TESTNET_RPC =
+  process.env.OPBNB_TESTNET_RPC || "https://opbnb-testnet-rpc.bnbchain.org";
+const MAINNET_RPC =
+  process.env.OPBNB_MAINNET_RPC || "https://opbnb-mainnet-rpc.bnbchain.org";
+
 const config: HardhatUserConfig = {
   solidity: {
     version: "0.8.24",
@@ -33,12 +40,12 @@ const config: HardhatUserConfig = {
       chainId: 31337,
     },
     opbnbTestnet: {
-      url: "https://opbnb-testnet-rpc.bnbchain.org",
+      url: TESTNET_RPC,
       chainId: 5611,
       accounts,
     },
     opbnbMainnet: {
-      url: "https://opbnb-mainnet-rpc.bnbchain.org",
+      url: MAINNET_RPC,
       chainId: 204,
       accounts,
     },
